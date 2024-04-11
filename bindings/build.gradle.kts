@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm") version "1.9.23"
-    application
     kotlin("plugin.serialization") version "1.9.23"
 }
 
@@ -13,18 +12,16 @@ repositories {
 
 dependencies {
     implementation("io.github.ayfri.kore:kore:1.4.0-24w10a")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-    implementation(project(":bindings"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    testImplementation(kotlin("test"))
 }
 
-
+tasks.test {
+    useJUnitPlatform()
+}
 kotlin {
     jvmToolchain(17)
     compilerOptions {
         freeCompilerArgs.add("-Xcontext-receivers")
     }
-}
-
-application {
-    mainClass.set("MainKt")
 }
