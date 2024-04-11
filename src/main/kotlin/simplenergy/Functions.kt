@@ -1,22 +1,22 @@
 package simplenergy
 
 
+import io.github.ayfri.kore.bindings.energy.Energy
 import io.github.ayfri.kore.DataPack
 import io.github.ayfri.kore.arguments.chatcomponents.scoreComponent
 import io.github.ayfri.kore.arguments.chatcomponents.textComponent
 import io.github.ayfri.kore.arguments.colors.Color
 import io.github.ayfri.kore.arguments.maths.vec3
-import io.github.ayfri.kore.arguments.scores.score
 import io.github.ayfri.kore.arguments.selector.scores
 import io.github.ayfri.kore.arguments.types.literals.*
-import io.github.ayfri.kore.arguments.types.resources.ItemArgument
 import io.github.ayfri.kore.arguments.types.resources.LootTableArgument
 import io.github.ayfri.kore.arguments.types.resources.storage
 import io.github.ayfri.kore.commands.*
+import io.github.ayfri.kore.commands.execute.ExecuteCondition
 import io.github.ayfri.kore.commands.execute.execute
 import io.github.ayfri.kore.commands.scoreboard.scoreboard
+import io.github.ayfri.kore.functions.Function
 import io.github.ayfri.kore.functions.function
-import net.benwoodworth.knbt.*
 
 
 context(DataPack)
@@ -32,164 +32,72 @@ fun simpleEnergyFunction() {
     }
 
     function("_give", "simplenergy") {
-        loot(self(), LootTableArgument.invoke("i/simplunium_ore", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/deepslate_simplunium_ore", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/raw_simplunium_block", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_block", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/raw_simplunium", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_ingot", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_nugget", "simplenergy"))
-        addBlankLine()
-        loot(self(), LootTableArgument.invoke("i/simplenergy_manual", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_helmet", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_chestplate", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_leggings", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_boots", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_sword", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_pickaxe", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_axe", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_hoe", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/simplunium_shovel", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/multimeter", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/wrench", "simplenergy"))
-        addBlankLine()
-        loot(self(), LootTableArgument.invoke("i/simple_battery", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/advanced_battery", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/elite_battery", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/elite_creative_battery", "simplenergy"))
-        addBlankLine()
-        loot(self(), LootTableArgument.invoke("i/cauldron_generator", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/furnace_generator", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/solar_panel", "simplenergy"))
-        addBlankLine()
-        loot(self(), LootTableArgument.invoke("i/electric_furnace", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/electric_smelter", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/electric_lamp", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/electric_brewing_stand", "simplenergy"))
-        addBlankLine()
-        loot(self(), LootTableArgument.invoke("i/simple_cable", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/advanced_cable", "simplenergy"))
-        loot(self(), LootTableArgument.invoke("i/elite_cable", "simplenergy"))
+        for (item in SimplEnergyItems.entries) {
+            loot(self(), LootTableArgument.invoke("i/${item.name}", item.namespace))
+        }
     }
 
     function("_stats", "simplenergy") {
-        addBlankLine()
         tellraw(self(), textComponent("\n[Datapack Energy Stats]", Color.YELLOW))
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            })
         }
         tellraw(self(), textComponent("Entities: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                    tag = "energy.cable"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            })
         }
         tellraw(self(), textComponent("Cables: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                    tag = "!energy.cable"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(Energy.cable(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            }, true))
         }
         tellraw(self(), textComponent("Devices: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                    tag = "energy.send, tag=!energy.receive"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(Energy.sender(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            }))
         }
         tellraw(self(), textComponent("Only energy.send: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                    tag = "energy.receive, tag=!energy.send"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(Energy.receiver(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            }))
         }
         tellraw(self(), textComponent("Only energy.receive: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    scores {
-                        score("energy.transfer_rate") greaterThan 0
-                    }
-                    tag = "energy.send, tag=energy.receive"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(Energy.senderAndReceiver(allEntities {
+                scores {
+                    Energy.transferRate() greaterThan 0
+                }
+            }))
         }
         tellraw(self(), textComponent("Send & Receive: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        addBlankLine()
-        addBlankLine()
         tellraw(self(), textComponent("\n[SimplEnergy Stats]", Color.GREEN))
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    tag = "simplenergy.destroyer"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(allEntities {
+                tag = "simplenergy.destroyer"
+            })
         }
         tellraw(self(), textComponent("Custom blocks loaded: ", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
-        addBlankLine()
-        execute {
-            storeResult {
-                score(literal("#temp"), "simplenergy.data")
-            }
-            ifCondition {
-                entity(allEntities {
-                    tag = "simplenergy.ore"
-                })
-            }
+        storeToTemp("simplenergy.data") {
+            entity(allEntities {
+                tag = "simplenergy.ore"
+            })
         }
         tellraw(self(), textComponent("Custom ores:", Color.GRAY) + scoreComponent("simplenergy.data", literal("#temp")) { color = Color.GOLD })
         addBlankLine()
@@ -246,25 +154,17 @@ fun simpleEnergyFunction() {
         tp(allEntities { tag = "simplenergy.destroyer" }, vec3(0, -10000, 0))
         kill(allEntities { tag = "simplenergy.destroyer" })
         addBlankLine()
-        clear(allPlayers(), ItemArgument.invoke(
-            "items", "#simplenergy",
-            mapOf("ctc" to mapOf("from" to "stoupy:simplenergy")).toNbtCompound()
-        ))
-        addBlankLine()
+        clear(allPlayers(), SimplEnergyItemTags.ITEMS)
         tellraw(self(), textComponent("You can now disable SimplEnergy or delete it of your datapack folder.", Color.GREEN))
     }
 
 }
-
-fun Map<*, *>.toNbtCompound(): NbtCompound {
-    val valuesAsCompound = mapValues { (_, value) ->
-        when (value) {
-            is Map<*, *> -> value.toNbtCompound()
-            is String -> NbtString(value)
-            is Int -> NbtInt(value)
-            else -> NbtString(value.toString())
+context(Function)
+fun storeToTemp(objective: String, condition: ExecuteCondition.() -> Unit) {
+    execute {
+        storeResult {
+            score(literal("#temp"), objective)
         }
+        ifCondition(condition)
     }
-    val keysAsStrings = valuesAsCompound.mapKeys { (key, _) -> key.toString() }
-    return NbtCompound(keysAsStrings)
 }
